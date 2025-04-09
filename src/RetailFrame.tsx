@@ -5,16 +5,17 @@ type RetailFrameProps = {
     title: string;
     src: string;
     frameOrigin: string;
+    styles?: string;
 };
 
 export const RetailFrame: React.FC<RetailFrameProps> = ({
-    src, id, title, frameOrigin
+    src, id, title, frameOrigin, styles
 }) => {
     const frame = useRef<HTMLIFrameElement>(null);
-    const queryParams = window.location.search;
+    const queryParams = globalThis.location.search;
 
     useEffect(() => {
-        window.addEventListener('message', (event) => {
+        globalThis.addEventListener('message', (event) => {
             if (event.origin !== frameOrigin) return;
 
             if (event.data?.height) {
@@ -22,7 +23,7 @@ export const RetailFrame: React.FC<RetailFrameProps> = ({
                 frame.current.contentWindow.postMessage({ location: globalThis.location.href }, frameOrigin);
             }
             if (event.data?.redirectUri) {
-                window.location.href = event.data?.redirectUri;
+                globalThis.location.href = event.data?.redirectUri;
             }
         });
     }, [frameOrigin]);
@@ -32,7 +33,7 @@ export const RetailFrame: React.FC<RetailFrameProps> = ({
             ref={frame}
             id={id}
             title={title}
-            src={`${src}${checkEsiaAuth(queryParams) ? `${queryParams}` : ''}`}
+            src={`${src}${checkEsiaAuth(queryParams) ? `${queryParams}&` : '?'}${styles ? `styles=${styles}` : ''}`}
         />
     );
 };
